@@ -1,0 +1,21 @@
+{
+  "name": "BasicApi",
+  "version": "1.0.0",
+  "description": "Basic API Node Server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Node",
+    "API"
+  ],
+  "author": "MijeaMihai",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.9.3",
+    "express": "^4.10.4",
+    "request": "^2.49.0",
+    "underscore": "^1.7.0"
+  }
+}
