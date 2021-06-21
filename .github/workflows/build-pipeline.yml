@@ -1,0 +1,48 @@
+name: Docker Image CI
+
+on: [push]
+     # Environment variables available to all jobs and steps in this workflow
+env: # Or as an environment variable
+      docker_username: ${{ secrets.DOCKER_USER }}
+      docker_password: ${{ secrets.DOCKER_PW }}
+
+jobs:
+
+  build-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Build the Docker image
+      run: docker build -t $docker_username/basicapi:dev .
+    - name: Login to Docker
+      run: echo "$docker_password" | docker login -u "$docker_username" --password-stdin
+    - name: Push the docker image
+      run: docker push $docker_username/basicapi:dev
+
+  kubernetes-component-test:
+    runs-on: ubuntu-latest
+    needs: build-docker-image
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Run KIND Test
+      run: sudo sh build-test.sh $docker_username
+  
+  promote-and-push-docker-image:
+    runs-on: ubuntu-latest
+    needs: kubernetes-component-test
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Pull the Docker image
+      run: docker pull $docker_username/basicapi:dev
+    - name: Tag the Docker image
+      run: docker tag $docker_username/basicapi:dev $docker_username/basicapi:release
+    - name: Login to Docker
+      run: echo "$docker_password" | docker login -u "$docker_username" --password-stdin
+    - name: Push the docker image
+      run: docker push $docker_username/basicapi:release
